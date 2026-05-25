@@ -63,4 +63,35 @@ describe('Express REST API TDD Integration Suite', () => {
       expect(res.body.countries.length).toBeGreaterThan(0);
     });
   });
+
+  describe('GET /api/insights/salary', () => {
+    it('should return global and structured department/country compensation insights', async () => {
+      const res = await request(app).get('/api/insights/salary');
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('global');
+      expect(res.body).toHaveProperty('countries');
+      expect(res.body).toHaveProperty('departments');
+      expect(res.body.global.headcount).toBe(6);
+    });
+  });
+
+  describe('GET /api/insights/job-titles', () => {
+    it('should return average salary by job title in a country', async () => {
+      const allRes = await request(app).get('/api/employees?limit=1');
+      const country = allRes.body.employees[0].country;
+
+      const res = await request(app).get(`/api/insights/job-titles?country=${encodeURIComponent(country)}`);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      if (res.body.length > 0) {
+        expect(res.body[0]).toHaveProperty('job_title');
+        expect(res.body[0]).toHaveProperty('avg_salary');
+      }
+    });
+
+    it('should return 400 if country parameter is missing', async () => {
+      const res = await request(app).get('/api/insights/job-titles');
+      expect(res.status).toBe(400);
+    });
+  });
 });
