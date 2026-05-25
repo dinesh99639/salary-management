@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import React from 'react';
 import App from './App.jsx';
 
@@ -35,6 +35,10 @@ const mockJobTitleInsightsResponse = [
 ];
 
 describe('Vite React Frontend TDD Component Suite', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn().mockImplementation((url) => {
       if (url.includes('/meta')) {
@@ -75,11 +79,11 @@ describe('Vite React Frontend TDD Component Suite', () => {
 
     await waitFor(() => {
       // Total Headcount (global headcount is 2)
-      expect(screen.getByText('2')).toBeDefined();
+      expect(screen.getAllByText('2')[0]).toBeDefined();
       // Annual Payroll Budget (global totalBudget is 180,000)
-      expect(screen.getByText('$180,000')).toBeDefined();
+      expect(screen.getAllByText('$180,000')[0]).toBeDefined();
       // Average Salary (global avgSalary is 90,000)
-      expect(screen.getByText('$90,000')).toBeDefined();
+      expect(screen.getAllByText('$90,000')[0]).toBeDefined();
     });
   });
 });

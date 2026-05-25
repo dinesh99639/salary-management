@@ -41,7 +41,7 @@ export default function App() {
     departments: [],
     statuses: []
   });
-  const [selectedCountry, setSelectedCountry] = useState('United States');
+  const [selectedCountry, setSelectedCountry] = useState('All');
   const [jobTitleInsights, setJobTitleInsights] = useState([]);
   const [isLoadingInsights, setIsLoadingInsights] = useState(true);
 
@@ -97,7 +97,7 @@ export default function App() {
         const data = await res.json();
         setMeta(data);
         // Default country if available
-        if (data.countries.length > 0 && !data.countries.includes(selectedCountry)) {
+        if (selectedCountry !== 'All' && data.countries.length > 0 && !data.countries.includes(selectedCountry)) {
           setSelectedCountry(data.countries[0]);
         }
       }
@@ -499,6 +499,7 @@ export default function App() {
                       value={selectedCountry}
                       onChange={(e) => setSelectedCountry(e.target.value)}
                     >
+                      <option value="All">All Countries</option>
                       {meta.countries.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
@@ -512,8 +513,8 @@ export default function App() {
               <div className="chart-card">
                 <div className="chart-header">
                   <div>
-                    <h3 className="chart-title">Compensation Bounds — {selectedCountry}</h3>
-                    <p className="chart-subtitle">Direct statistical analysis for this country</p>
+                    <h3 className="chart-title">Compensation Bounds — {selectedCountry === 'All' ? 'All Countries' : selectedCountry}</h3>
+                    <p className="chart-subtitle">{selectedCountry === 'All' ? 'Direct statistical analysis globally' : 'Direct statistical analysis for this country'}</p>
                   </div>
                 </div>
                 
@@ -521,9 +522,15 @@ export default function App() {
                   <div className="empty-state">Loading bounding metrics...</div>
                 ) : (
                   (() => {
-                    const localData = insights.countries.find(c => c.country === selectedCountry) || {
+                    const localData = selectedCountry === 'All' ? {
+                      min_salary: insights.countries.length > 0 ? Math.min(...insights.countries.map(c => c.min_salary)) : 0,
+                      max_salary: insights.countries.length > 0 ? Math.max(...insights.countries.map(c => c.max_salary)) : 0,
+                      avg_salary: insights.global.avgSalary,
+                      headcount: insights.global.headcount,
+                      total_salary: insights.global.totalBudget
+                    } : (insights.countries.find(c => c.country === selectedCountry) || {
                       min_salary: 0, max_salary: 0, avg_salary: 0, headcount: 0, total_salary: 0
-                    };
+                    });
                     return (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', justifyContent: 'center', height: '100%' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
@@ -538,13 +545,13 @@ export default function App() {
                         </div>
 
                         <div style={{ background: 'rgba(99, 102, 241, 0.03)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--card-hover-border)', textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Country Average</div>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{selectedCountry === 'All' ? 'Global Average' : 'Country Average'}</div>
                           <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white', margin: '0.25rem 0' }}>{formatCurrency(localData.avg_salary)}</div>
-                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Based on {formatNumber(localData.headcount)} local employee contracts</p>
+                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Based on {formatNumber(localData.headcount)} {selectedCountry === 'All' ? 'total global' : 'local'} employee contracts</p>
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 0.5rem', fontSize: '0.85rem' }}>
-                          <span style={{ color: 'var(--text-secondary)' }}>Total Country Spend:</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>{selectedCountry === 'All' ? 'Total Global Spend:' : 'Total Country Spend:'}</span>
                           <span style={{ fontWeight: 600, color: 'white' }}>{formatCurrency(localData.total_salary)}</span>
                         </div>
                       </div>
