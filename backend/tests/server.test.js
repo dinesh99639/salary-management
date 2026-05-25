@@ -51,4 +51,16 @@ describe('Express REST API TDD Integration Suite', () => {
       });
     });
   });
+
+  describe('GET /api/meta', () => {
+    it('should return dropdown metadata lists and department job mappings', async () => {
+      const res = await request(app).get('/api/meta');
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('countries');
+      expect(res.body).toHaveProperty('departments');
+      expect(res.body).toHaveProperty('jobTitles');
+      expect(res.body).toHaveProperty('jobTitleDeptMap');
+      expect(res.body.countries.length).toBeGreaterThan(0);
+    });
+  });
 });
