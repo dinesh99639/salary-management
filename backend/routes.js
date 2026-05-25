@@ -208,6 +208,7 @@ router.delete('/employees/:id', (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+*/
 
 // 6. GET /api/insights/salary - salary analytics
 router.get('/insights/salary', (req, res) => {
@@ -300,6 +301,7 @@ router.get('/insights/job-titles', (req, res) => {
   }
 });
 
+/*
 */
 
 // 8. GET /api/meta - categories metadata (countries, departments, jobs, etc.) to populate dropdowns
