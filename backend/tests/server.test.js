@@ -94,4 +94,76 @@ describe('Express REST API TDD Integration Suite', () => {
       expect(res.status).toBe(400);
     });
   });
+
+  describe('CRUD Operations /api/employees', () => {
+    let testEmployeeId;
+
+    it('should create a new employee with valid inputs', async () => {
+      const payload = {
+        full_name: 'John Doe',
+        email: 'john.doe@organization.com',
+        job_title: 'Software Engineer',
+        department: 'Engineering',
+        country: 'United States',
+        salary: 105000,
+        hire_date: '2025-01-15',
+        status: 'Active'
+      };
+
+      const res = await request(app).post('/api/employees').send(payload);
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.full_name).toBe('John Doe');
+      testEmployeeId = res.body.id;
+    });
+
+    it('should prevent creating employee with negative salary', async () => {
+      const payload = {
+        full_name: 'Jane Doe',
+        email: 'jane.doe@organization.com',
+        job_title: 'UX Designer',
+        department: 'Design',
+        country: 'United States',
+        salary: -50000,
+        hire_date: '2025-01-15',
+        status: 'Active'
+      };
+
+      const res = await request(app).post('/api/employees').send(payload);
+      expect(res.status).toBe(400);
+      expect(res.body.errors).toContain('Salary must be a positive number.');
+    });
+
+    it('should retrieve a single employee by ID', async () => {
+      const res = await request(app).get(`/api/employees/${testEmployeeId}`);
+      expect(res.status).toBe(200);
+      expect(res.body.full_name).toBe('John Doe');
+    });
+
+    it('should update an existing employee details', async () => {
+      const payload = {
+        full_name: 'John Doe Sr.',
+        email: 'john.doe@organization.com',
+        job_title: 'Senior Software Engineer',
+        department: 'Engineering',
+        country: 'United States',
+        salary: 130000,
+        hire_date: '2025-01-15',
+        status: 'Active'
+      };
+
+      const res = await request(app).put(`/api/employees/${testEmployeeId}`).send(payload);
+      expect(res.status).toBe(200);
+      expect(res.body.full_name).toBe('John Doe Sr.');
+      expect(res.body.job_title).toBe('Senior Software Engineer');
+    });
+
+    it('should delete an employee by ID', async () => {
+      const deleteRes = await request(app).delete(`/api/employees/${testEmployeeId}`);
+      expect(deleteRes.status).toBe(200);
+
+      const getRes = await request(app).get(`/api/employees/${testEmployeeId}`);
+      expect(getRes.status).toBe(404);
+    });
+  });
 });
