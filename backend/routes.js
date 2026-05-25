@@ -118,7 +118,6 @@ router.get('/employees', (req, res) => {
   }
 });
 
-/*
 // 2. GET /api/employees/:id - view single employee
 router.get('/employees/:id', (req, res) => {
   try {
@@ -208,7 +207,6 @@ router.delete('/employees/:id', (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-*/
 
 // 6. GET /api/insights/salary - salary analytics
 router.get('/insights/salary', (req, res) => {
