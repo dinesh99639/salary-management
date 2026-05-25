@@ -272,7 +272,7 @@ router.get('/insights/salary', (req, res) => {
   }
 });
 
-// 7. GET /api/insights/job-titles - average salary by job title in a specific country
+// 7. GET /api/insights/job-titles - average salary by job title in a specific country (or all)
 router.get('/insights/job-titles', (req, res) => {
   try {
     const { country } = req.query;
@@ -280,18 +280,33 @@ router.get('/insights/job-titles', (req, res) => {
       return res.status(400).json({ error: 'Country parameter is required.' });
     }
 
-    const jobTitleMetrics = db.prepare(`
-      SELECT 
-        job_title, 
-        COUNT(*) as headcount, 
-        MIN(salary) as min_salary,
-        MAX(salary) as max_salary,
-        AVG(salary) as avg_salary
-      FROM employees 
-      WHERE country = ?
-      GROUP BY job_title
-      ORDER BY avg_salary DESC
-    `).all(country);
+    let jobTitleMetrics;
+    if (country === 'All') {
+      jobTitleMetrics = db.prepare(`
+        SELECT 
+          job_title, 
+          COUNT(*) as headcount, 
+          MIN(salary) as min_salary,
+          MAX(salary) as max_salary,
+          AVG(salary) as avg_salary
+        FROM employees 
+        GROUP BY job_title
+        ORDER BY avg_salary DESC
+      `).all();
+    } else {
+      jobTitleMetrics = db.prepare(`
+        SELECT 
+          job_title, 
+          COUNT(*) as headcount, 
+          MIN(salary) as min_salary,
+          MAX(salary) as max_salary,
+          AVG(salary) as avg_salary
+        FROM employees 
+        WHERE country = ?
+        GROUP BY job_title
+        ORDER BY avg_salary DESC
+      `).all(country);
+    }
 
     res.json(jobTitleMetrics);
   } catch (error) {
