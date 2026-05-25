@@ -93,6 +93,15 @@ describe('Express REST API TDD Integration Suite', () => {
       const res = await request(app).get('/api/insights/job-titles');
       expect(res.status).toBe(400);
     });
+
+    it('should return average salary by job title globally if country is All', async () => {
+      const res = await request(app).get('/api/insights/job-titles?country=All');
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body[0]).toHaveProperty('job_title');
+      expect(res.body[0]).toHaveProperty('avg_salary');
+    });
   });
 
   describe('CRUD Operations /api/employees', () => {
