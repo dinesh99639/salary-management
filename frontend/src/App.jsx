@@ -49,6 +49,7 @@ export default function App() {
   const [employees, setEmployees] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, totalCount: 0, totalPages: 1 });
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterCountry, setFilterCountry] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('');
   const [filterJobTitle, setFilterJobTitle] = useState('');
@@ -143,7 +144,7 @@ export default function App() {
       const queryParams = new URLSearchParams({
         page: pagination.page,
         limit: pagination.limit,
-        search,
+        search: debouncedSearch,
         country: filterCountry,
         department: filterDepartment,
         jobTitle: filterJobTitle,
@@ -163,7 +164,7 @@ export default function App() {
     } finally {
       setIsLoadingEmployees(false);
     }
-  }, [pagination.page, pagination.limit, search, filterCountry, filterDepartment, filterJobTitle, sortBy, sortOrder, addToast]);
+  }, [pagination.page, pagination.limit, debouncedSearch, filterCountry, filterDepartment, filterJobTitle, sortBy, sortOrder, addToast]);
 
   // Initial Bootstrapping
   useEffect(() => {
@@ -184,11 +185,15 @@ export default function App() {
   // Search debounce / instant trigger
   useEffect(() => {
     const delay = setTimeout(() => {
-      setPagination(prev => ({ ...prev, page: 1 }));
-      fetchEmployees();
-    }, 4000); // 400ms debounce
+      setDebouncedSearch(search);
+    }, 400); // 400ms debounce
     return () => clearTimeout(delay);
   }, [search]);
+
+  // Reset pagination on debounced search changes
+  useEffect(() => {
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, [debouncedSearch]);
 
   // Handle Search Input Change
   const handleSearchChange = (e) => {
@@ -198,6 +203,7 @@ export default function App() {
   // Reset Filters
   const resetFilters = () => {
     setSearch('');
+    setDebouncedSearch('');
     setFilterCountry('');
     setFilterDepartment('');
     setFilterJobTitle('');
