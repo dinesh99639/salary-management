@@ -300,6 +300,8 @@ router.get('/insights/job-titles', (req, res) => {
   }
 });
 
+*/
+
 // 8. GET /api/meta - categories metadata (countries, departments, jobs, etc.) to populate dropdowns
 router.get('/meta', (req, res) => {
   try {
@@ -327,6 +329,6 @@ router.get('/meta', (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-*/
+
 
 export default router;
